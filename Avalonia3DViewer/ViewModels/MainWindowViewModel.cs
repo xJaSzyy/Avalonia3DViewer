@@ -17,7 +17,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private double _canvasWidth;
     private double _canvasHeight;
     
-    private List<Shape3D> _currentShapes = [];
+    private readonly List<Shape3D> _currentShapes = [];
     private readonly DispatcherTimer _timer;
     private float _dz = 1;
     private float _angle;
@@ -45,11 +45,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Shapes.Clear();
 
-        for (var i = 0; i < _currentShapes.Count; i++)
+        foreach (var shape in _currentShapes)
         {
             var screenPoints = new List<Vector2>();
-
-            var shape = _currentShapes[i];
             
             foreach (var vertex in shape.Vertices)
             {
@@ -59,7 +57,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 var screenPos = ToScreenPosition(projected);
                 screenPoints.Add(screenPos);
 
-                var vertexContainer = new Grid
+                var grid = new Grid
                 {
                     Width = 32,
                     Height = 32,
@@ -78,7 +76,7 @@ public partial class MainWindowViewModel : ViewModelBase
                         FontWeight = FontWeight.Bold
                     };
                     
-                    vertexContainer.Children.Add(text);
+                    grid.Children.Add(text);
                 }
                 else
                 {
@@ -91,10 +89,10 @@ public partial class MainWindowViewModel : ViewModelBase
                         VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
                     };
                     
-                    vertexContainer.Children.Add(ellipse);
+                    grid.Children.Add(ellipse);
                 }
                 
-                Shapes.Add(vertexContainer);
+                Shapes.Add(grid);
             }
         
             foreach (var edge in shape.Edges)
@@ -192,6 +190,17 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _showNumbers = !_showNumbers;
 
+        if (_isPaused)
+        {
+            UpdateAll();
+        }
+    }
+
+    public void Zoom(double y)
+    {
+        _dz += y > 0 ? .1f : -.1f;
+        _dz = Math.Clamp(_dz, 0, 1.5f);
+        
         if (_isPaused)
         {
             UpdateAll();

@@ -12,6 +12,7 @@ public partial class MainWindow : Window
         AvaloniaXamlLoader.Load(this);
         
         KeyDown += OnKeyDown;
+        PointerWheelChanged += OnWheelChanged;
     }
     
     private void OnCanvasSizeChanged(object sender, SizeChangedEventArgs e)
@@ -38,6 +39,15 @@ public partial class MainWindow : Window
         if (e.Key == Key.Tab)
         {
             vm.ToggleVertexNumbers();
+            e.Handled = true;
+        }
+    }
+    
+    private void OnWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        if (DataContext is MainWindowViewModel vm)
+        {
+            vm.Zoom(e.Delta.Y);
             e.Handled = true;
         }
     }
