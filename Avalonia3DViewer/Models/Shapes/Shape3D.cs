@@ -6,8 +6,8 @@ namespace Avalonia3DViewer.Models.Shapes;
 public class Shape3D
 {
     public List<Vector3> Vertices { get; protected set; }
-    public List<(int, int)> Edges { get; protected set; }
-    public List<(int, int, int)> Faces { get; protected set; }
+    public List<Vector2> Edges { get; protected set; }
+    public List<Vector3> Faces { get; protected set; }
     public Vector3 Position { get; protected set; }
     
     protected Shape3D()

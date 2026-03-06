@@ -12,19 +12,20 @@ public class Pyramid3D : Shape3D
             new Vector3(size, -size, size),
             new Vector3(-size, -size, -size),
             new Vector3(size, -size, -size),
-            new Vector3(0, size * 2, 0)
+            new Vector3(0, size, 0)
         ];
 
         Edges =
         [
-            (0, 4), (1, 4), (2, 4), (3, 4),
-            (0, 1), (1, 3), (2, 3), (2, 0)
+            new Vector2(0, 4), new Vector2(1, 4), new Vector2(2, 4), new Vector2(3, 4),
+            new Vector2(0, 1), new Vector2(1, 3), new Vector2(2, 3), new Vector2(2, 0)
         ];
 
         Faces =
         [
-            (0, 1, 4), (2, 3, 4), (0, 2, 4), (1, 3, 4),
-            (0, 1, 2), (1, 2, 3)
+            new Vector3(0, 1, 4), new Vector3(2, 3, 4), 
+            new Vector3(0, 2, 4), new Vector3(1, 3, 4),
+            new Vector3(0, 1, 2), new Vector3(1, 2, 3)
         ];
 
         Position = position;

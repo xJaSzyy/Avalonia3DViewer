@@ -99,8 +99,8 @@ public partial class MainWindowViewModel : ViewModelBase
         
             foreach (var edge in shape.Edges)
             {
-                var start = screenPoints[edge.Item1];
-                var end = screenPoints[edge.Item2];
+                var start = screenPoints[(int)edge.X];
+                var end = screenPoints[(int)edge.Y];
             
                 var edgeShape = new Line
                 {
@@ -115,9 +115,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
             foreach (var face in shape.Faces)
             {
-                var point1 = screenPoints[face.Item1];
-                var point2 = screenPoints[face.Item2];
-                var point3 = screenPoints[face.Item3];
+                var point1 = screenPoints[(int)face.X];
+                var point2 = screenPoints[(int)face.Y];
+                var point3 = screenPoints[(int)face.Z];
                 
                 var faceShape = new Polygon
                 {
