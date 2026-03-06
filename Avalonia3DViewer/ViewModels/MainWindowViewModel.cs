@@ -149,11 +149,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private Vector2 ToScreenPosition(Vector2 point)
     {
+        var minDimension = Math.Min(_canvasWidth, _canvasHeight);
+    
         return new Vector2(
-            (float)((point.X + 1) / 2 * _canvasWidth),
-            (float)((1 - (point.Y + 1) / 2) * _canvasHeight)
+            (float)((point.X + 1) / 2 * minDimension + (_canvasWidth - minDimension) / 2),
+            (float)((1 - (point.Y + 1) / 2) * minDimension + (_canvasHeight - minDimension) / 2)
         );
     }
+
 
     private Vector2 ToProject(Vector3 point)
     {
