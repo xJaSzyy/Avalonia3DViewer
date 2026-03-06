@@ -7,11 +7,14 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Avalonia3DViewer.Models.Shapes;
 
 namespace Avalonia3DViewer.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
+    private const float ShapeSize = .1f;
+    
     public ObservableCollection<Control> Shapes { get; } = new(); 
     
     private double _canvasWidth;
@@ -21,10 +24,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly DispatcherTimer _timer;
     private float _dz = 1;
     private float _angle;
-    private const float Size = .1f;
 
-    private bool _isPaused = false;
-    private bool _showNumbers = false;
+    private bool _isPaused;
+    private bool _showNumbers;
 
     public MainWindowViewModel()
     {
@@ -37,8 +39,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void LoadShapes()
     {
-        _currentShapes.Add(new Cube3D(new Vector3(-Size - Size/2, 0, 0), Size));
-        _currentShapes.Add(new Pyramid3D(new Vector3(Size + Size/2, 0, 0), Size));
+        _currentShapes.Add(new Cube3D(new Vector3(-ShapeSize - ShapeSize/2, 0, 0), ShapeSize));
+        _currentShapes.Add(new Pyramid3D(new Vector3(ShapeSize + ShapeSize/2, 0, 0), ShapeSize));
     }
 
     private void UpdateAll()
@@ -201,93 +203,16 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void Zoom(double y)
     {
-        _dz += y > 0 ? .1f : -.1f;
-        _dz = Math.Clamp(_dz, 0, 1.5f);
+        const float step = .1f;
+        const float minZoom = 0f;
+        const float maxZoom = 1.5f;
+        
+        _dz += y > 0 ? step : -step;
+        _dz = Math.Clamp(_dz, minZoom, maxZoom);
         
         if (_isPaused)
         {
             UpdateAll();
         }
-    }
-}
-
-public class Shape3D
-{
-    public List<Vector3> Vertices { get; protected set; }
-    public List<(int, int)> Edges { get; protected set; }
-    public List<(int, int, int)> Faces { get; protected set; }
-    public Vector3 Position { get; protected set; }
-    
-    protected Shape3D()
-    {
-        Vertices = [];
-        Edges = [];
-        Faces = [];
-    }
-}
-
-public class Cube3D : Shape3D
-{
-    public Cube3D(Vector3 position, float size = 0.25f)
-    {
-        Vertices =
-        [
-            new Vector3(-size, -size, size),
-            new Vector3(size, -size, size),
-            new Vector3(size, size, size),
-            new Vector3(-size, size, size),
-            new Vector3(-size, -size, -size),
-            new Vector3(size, -size, -size),
-            new Vector3(size, size, -size),
-            new Vector3(-size, size, -size)
-        ];
-
-        Edges =
-        [
-            (0, 1), (1, 2), (2, 3), (3, 0),
-            (4, 5), (5, 6), (6, 7), (7, 4),
-            (0, 4), (1, 5), (2, 6), (3, 7)
-        ];
-
-        Faces =
-        [
-            (0, 1, 2), (0, 2, 3), 
-            (1, 2, 6), (1, 5, 6),
-            (4, 5, 6), (4, 7, 6),
-            (0, 3, 7), (0, 4, 7),
-            (0, 1, 5), (0, 4, 5),
-            (2, 3, 7), (2, 6, 7),
-        ];
-
-        Position = position;
-    }
-}
-
-public class Pyramid3D : Shape3D
-{
-    public Pyramid3D(Vector3 position, float size = 0.25f)
-    {
-        Vertices =
-        [
-            new Vector3(-size, -size, size),
-            new Vector3(size, -size, size),
-            new Vector3(-size, -size, -size),
-            new Vector3(size, -size, -size),
-            new Vector3(0, size * 2, 0)
-        ];
-
-        Edges =
-        [
-            (0, 4), (1, 4), (2, 4), (3, 4),
-            (0, 1), (1, 3), (2, 3), (2, 0)
-        ];
-
-        Faces =
-        [
-            (0, 1, 4), (2, 3, 4), (0, 2, 4), (1, 3, 4),
-            (0, 1, 2), (1, 2, 3)
-        ];
-
-        Position = position;
     }
 }
