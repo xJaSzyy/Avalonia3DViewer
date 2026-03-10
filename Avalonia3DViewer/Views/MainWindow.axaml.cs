@@ -46,7 +46,7 @@ public partial class MainWindow : Window
 
         if (e.Key == Key.Tab)
         {
-            vm.ToggleVertexNumbers();
+            vm.SwitchMode();
             e.Handled = true;
         }
     }

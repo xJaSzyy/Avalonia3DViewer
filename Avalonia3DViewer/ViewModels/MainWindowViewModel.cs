@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Numerics;
 using Avalonia;
 using Avalonia.Controls;
@@ -27,7 +28,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private float _pitch;  
     
     private bool _isPaused;
-    private bool _showNumbers;
+    private ShowMode _showMode = ShowMode.None;
+
+    public enum ShowMode
+    {
+        None = 0,
+        Vertex = 1,
+        Numbers = 2
+    }
 
     public MainWindowViewModel()
     {
@@ -41,7 +49,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void LoadShapes()
     {
         _currentShapes.Add(new Cube3D(new Vector3(-ShapeSize - ShapeSize / 2, 0, 0), ShapeSize));
-        _currentShapes.Add(new Pyramid3D(new Vector3(ShapeSize + ShapeSize / 2, 0, 0), ShapeSize));
+        _currentShapes.Add(new Sphere3D(new Vector3(ShapeSize + ShapeSize / 2, 0, 0), ShapeSize));
     }
 
     private void UpdateAll()
@@ -67,21 +75,7 @@ public partial class MainWindowViewModel : ViewModelBase
                     RenderTransform = new TranslateTransform(screenPos.X - 16, screenPos.Y - 16)
                 };
 
-                if (_showNumbers)
-                {
-                    var text = new TextBlock
-                    {
-                        Text = shape.Vertices.IndexOf(vertex).ToString(),
-                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                        Foreground = Brushes.White,
-                        FontSize = 16,
-                        FontWeight = FontWeight.Bold
-                    };
-                    
-                    grid.Children.Add(text);
-                }
-                else
+                if (_showMode is ShowMode.Numbers or ShowMode.Vertex)
                 {
                     var ellipse = new Ellipse
                     {
@@ -89,12 +83,33 @@ public partial class MainWindowViewModel : ViewModelBase
                         Height = 8,
                         Fill = Brushes.Red,
                         HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                        ZIndex = 0
                     };
-                    
+
+                    if (_showMode is ShowMode.Numbers)
+                    {
+                        var text = new TextBlock
+                        {
+                            Text = shape.Vertices.IndexOf(vertex).ToString(),
+                            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                            Foreground = Brushes.Black,
+                            FontSize = 16,
+                            FontWeight = FontWeight.Bold,
+                            ZIndex = 1
+                        };
+
+                        ellipse.Width = 24;
+                        ellipse.Height = 24;
+                        ellipse.Fill = Brushes.White;
+
+                        grid.Children.Add(text);
+                    }
+
                     grid.Children.Add(ellipse);
                 }
-                
+
                 Shapes.Add(grid);
             }
         
@@ -108,7 +123,8 @@ public partial class MainWindowViewModel : ViewModelBase
                     StartPoint = new Point(start.X, start.Y),
                     EndPoint = new Point(end.X, end.Y),
                     Stroke = Brushes.Green,
-                    StrokeThickness = 1
+                    StrokeThickness = 1,
+                    ZIndex = -1
                 };
             
                 Shapes.Add(edgeShape);
@@ -129,6 +145,7 @@ public partial class MainWindowViewModel : ViewModelBase
                         new(point3.X, point3.Y),
                     },
                     Fill = Brushes.White,
+                    ZIndex = -1,
                     Opacity = .25f
                 };
                 
@@ -187,7 +204,6 @@ public partial class MainWindowViewModel : ViewModelBase
         );
     }
 
-
     public void UpdateCanvasSize(double width, double height)
     {
         _canvasWidth = width;
@@ -201,9 +217,12 @@ public partial class MainWindowViewModel : ViewModelBase
         _isPaused = !_isPaused;
     }
 
-    public void ToggleVertexNumbers()
+    public void SwitchMode()
     {
-        _showNumbers = !_showNumbers;
+        var values = Enum.GetValues<ShowMode>();
+        var currentIndex = Array.IndexOf(values, _showMode);
+        var nextIndex = (currentIndex + 1) % values.Length;
+        _showMode = values[nextIndex];
 
         if (_isPaused)
         {
@@ -230,7 +249,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         const float sensitivity = 0.02f;  
         _pitch += (float)(delta * sensitivity);
-        _pitch = Math.Clamp(_pitch, -MathF.PI / 2 + 0.1f, MathF.PI / 2 - 0.1f);  
+        //_pitch = Math.Clamp(_pitch, -MathF.PI / 2 + 0.1f, MathF.PI / 2 - 0.1f);  
 
         if (_isPaused)
         {
