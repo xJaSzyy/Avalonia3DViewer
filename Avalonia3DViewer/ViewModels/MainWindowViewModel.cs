@@ -15,7 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private const float ShapeSize = .1f;
     
-    public ObservableCollection<Control> Shapes { get; } = new(); 
+    public ObservableCollection<Control> Shapes { get; } = []; 
     
     private double _canvasWidth;
     private double _canvasHeight;
@@ -24,7 +24,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly DispatcherTimer _timer;
     private float _dz = 1;
     private float _angle;
-
+    private float _pitch;  
+    
     private bool _isPaused;
     private bool _showNumbers;
 
@@ -39,8 +40,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void LoadShapes()
     {
-        _currentShapes.Add(new Cube3D(new Vector3(-ShapeSize - ShapeSize/2, 0, 0), ShapeSize));
-        _currentShapes.Add(new Pyramid3D(new Vector3(ShapeSize + ShapeSize/2, 0, 0), ShapeSize));
+        _currentShapes.Add(new Cube3D(new Vector3(-ShapeSize - ShapeSize / 2, 0, 0), ShapeSize));
+        _currentShapes.Add(new Pyramid3D(new Vector3(ShapeSize + ShapeSize / 2, 0, 0), ShapeSize));
     }
 
     private void UpdateAll()
@@ -170,13 +171,22 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var cos = MathF.Cos(angle);
         var sin = MathF.Sin(angle);
-        
+    
+        var pitchCos = MathF.Cos(_pitch);
+        var pitchSin = MathF.Sin(_pitch);
+        var pitched = new Vector3(
+            point.X,
+            point.Y * pitchCos - point.Z * pitchSin,
+            point.Y * pitchSin + point.Z * pitchCos
+        );
+    
         return new Vector3(
-            point.X * cos - point.Z * sin,
-            point.Y,
-            point.X * sin + point.Z * cos
+            pitched.X * cos - pitched.Z * sin,
+            pitched.Y,
+            pitched.X * sin + pitched.Z * cos
         );
     }
+
 
     public void UpdateCanvasSize(double width, double height)
     {
@@ -210,6 +220,18 @@ public partial class MainWindowViewModel : ViewModelBase
         _dz += y > 0 ? step : -step;
         _dz = Math.Clamp(_dz, minZoom, maxZoom);
         
+        if (_isPaused)
+        {
+            UpdateAll();
+        }
+    }
+    
+    public void MoveVertical(double delta)
+    {
+        const float sensitivity = 0.02f;  
+        _pitch += (float)(delta * sensitivity);
+        _pitch = Math.Clamp(_pitch, -MathF.PI / 2 + 0.1f, MathF.PI / 2 - 0.1f);  
+
         if (_isPaused)
         {
             UpdateAll();
